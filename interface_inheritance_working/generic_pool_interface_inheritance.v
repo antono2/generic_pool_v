@@ -108,10 +108,6 @@ pub fn (a LuminousActor) draw_luminous() {
   println("Drawing Luminous Actor")
 }
 
-pub fn (g_o GameObject) print_info() {
-  g_o.print_info()
-}
-
 pub  struct Game {
 pub mut:
   actor1 Actor1
@@ -142,10 +138,6 @@ pub fn (mut ap ActorPool<T>) create_actors<T>(n int, args []GameObject) {
 }
 
 pub fn (mut ap ActorPool<T>) get_instance() ?T {
-  // $if !(T is IActor || T is ILuminousActor) {
-  //   return none
-  // }
-  
   for _ in 0..ap.actors.len {
     ap.actor_idx--
     if ap.actor_idx < 0 {
