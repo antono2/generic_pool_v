@@ -208,9 +208,9 @@ pub fn main() {
   created_actor1.print_info()
   created_actor2.print_info()
   created_actor3.print_info()
-  pool1.clear<IActor>()
-  pool2.clear<IActor>()
-  pool3.clear<ILuminousActor>()
+  pool1.clear()
+  pool2.clear()
+  pool3.clear()
   created_actor1 = pool1.get_instance() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
   created_actor2 = pool2.get_instance() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
   created_actor3 = pool3.get_instance() or { panic("Couldn't get an instance of LuminousActor, where exists = false.") }
