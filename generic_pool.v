@@ -1,9 +1,11 @@
 /*
-The idea here is to have a generic initialization function init(args []Object),
-which then can be used in a generic Object Pool. Pool manages the number of instaces.
-IActor can be initialized this way.
-GameObject sum type is used for casting Objects around.
+The idea here is to have a generic parameter initialization function init(args []Object)
+for each game actor, which then can be used in a generic Object Pool.
+Pool manages the number of instaces.
+IActor or the inheriting ILuminousActor can be initialized and used in a pool this way.
+GameObject sum type needs to contain all init parameters.
 */
+
 
 module main
 
@@ -16,10 +18,9 @@ mut:
 
 interface ILuminousActor {
   IActor
+mut:
   draw_luminous()
 }
-
-pub type GameObject = ActorParam1 | ActorParam2
 
 pub struct ActorParam1 {
 pub mut:
@@ -30,6 +31,8 @@ pub struct ActorParam2 {
 pub mut:
   some_float f32 = f32(0.1)
 }
+
+pub type GameObject = ActorParam1 | ActorParam2
 
 pub struct Actor1 {
 pub mut:
@@ -45,12 +48,18 @@ pub mut:
   param2 ActorParam2
 }
 
+pub struct LuminousActor {
+pub mut:
+  exists bool
+  name string = "LuminousActor"
+  param1 ActorParam1
+}
+
 pub fn (mut a Actor1) init(args []GameObject) {
   for i in 0..args.len {
     match args[i] {
       ActorParam1 { 
         a.param1 = args[i] as ActorParam1 
-        //a.exists = true
       }
       else {}
     }
@@ -62,7 +71,17 @@ pub fn (mut a Actor2) init(args []GameObject) {
     match args[i] {
       ActorParam2 { 
         a.param2 = args[i] as ActorParam2
-        //a.exists = true
+      }
+      else {}
+    }
+  }
+}
+
+pub fn (mut a LuminousActor) init(args []GameObject) {
+  for i in 0..args.len {
+    match args[i] {
+      ActorParam1 { 
+        a.param1 = args[i] as ActorParam1
       }
       else {}
     }
@@ -75,6 +94,14 @@ pub fn (a Actor1) print_info() {
 
 pub fn (a Actor2) print_info() {
   println("Name: $a.name Param: $a.param2.some_float Exists: $a.exists")
+}
+
+pub fn (a LuminousActor) print_info() {
+  println("Name: $a.name Param: $a.param1.some_int Exists: $a.exists")
+}
+
+pub fn (a LuminousActor) draw_luminous() {
+  println("Drawing Luminous Actor")
 }
 
 pub  struct Game {
@@ -106,7 +133,7 @@ pub fn (mut ap ActorPool<T>) create_actors<T>(n int, args []GameObject) {
   ap.actor_idx = 0
 }
 
-pub fn (mut ap ActorPool<T>) get_instance<T>() ?IActor {
+pub fn (mut ap ActorPool<T>) get_instance() ?T {
   for _ in 0..ap.actors.len {
     ap.actor_idx--
     if ap.actor_idx < 0 {
@@ -129,7 +156,7 @@ pub fn (mut ap ActorPool<T>) clear() {
 /*
   Test implementation
 */
-pub fn create_actors<T>() {
+pub fn main() {
   mut game := Game{}
   println("PRE INIT")
   game.actor1.print_info()
@@ -148,35 +175,43 @@ pub fn create_actors<T>() {
 
   mut pool1 := ActorPool<Actor1>{}
   mut pool2 := ActorPool<Actor2>{}
+  mut pool3 := ActorPool<LuminousActor>{}
   mut new_args1 := [args1[0] as ActorParam1]
   mut new_args2 := [args2[0] as ActorParam2]
+  mut new_args3 := [args1[0] as ActorParam1]
   new_args1[0].some_int = 9002
   new_new_args1 := [GameObject(new_args1[0])]
   new_args2[0].some_float = f32(0.3)
   new_new_args2 := [GameObject(new_args2[0])]
+  new_args3[0].some_int = 111
+  new_new_args3 := [GameObject(new_args3[0])]
   pool1.new<Actor1>(1, new_new_args1) //I'd like to use []GameObject(new_args1) instead, or better no cast at all
   pool2.new<Actor2>(1, new_new_args2)
-  mut created_actor1 := pool1.get_instance<IActor>() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
-  mut created_actor2 := pool2.get_instance<IActor>() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
+  pool3.new<LuminousActor>(1, new_new_args3)
   
+  mut created_actor1 := pool1.get_instance() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
+  mut created_actor2 := pool2.get_instance() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
+  mut created_actor3 := pool3.get_instance() or { panic("Couldn't get an instance of LuminousActor, where exists = false.") }
+
   println("ACTOR POOL INSTANCE")
   created_actor1.print_info()
   created_actor2.print_info()
+  created_actor3.print_info()
   created_actor1.exists = true
   created_actor2.exists = true
+  created_actor3.exists = true
   println("PRE CLEAR")
   created_actor1.print_info()
   created_actor2.print_info()
-  pool1.clear<IActor>()
-  pool2.clear<IActor>()
-  created_actor1 = pool1.get_instance<IActor>() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
-  created_actor2 = pool2.get_instance<IActor>() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
-  
+  created_actor3.print_info()
+  pool1.clear()
+  pool2.clear()
+  pool3.clear()
+  created_actor1 = pool1.get_instance() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
+  created_actor2 = pool2.get_instance() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
+  created_actor3 = pool3.get_instance() or { panic("Couldn't get an instance of LuminousActor, where exists = false.") }
   println("AFTER CLEAR")
   created_actor1.print_info()
   created_actor2.print_info()
-}
-
-pub fn main() {
-  create_actors<GameObject>()
+  created_actor3.print_info()
 }
