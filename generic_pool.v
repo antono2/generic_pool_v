@@ -112,7 +112,7 @@ pub fn (mut ap ActorPool<T>) get_instance<T>() ?IActor {
     if ap.actor_idx < 0 {
       ap.actor_idx = ap.actors.len - 1
     }
-    if !IActor(ap.actors[ap.actor_idx]).exists {
+    if !ap.actors[ap.actor_idx].exists {
       return ap.actors[ap.actor_idx]
     }
   }
