@@ -14,6 +14,7 @@ mut:
   exists bool
   init([]GameObject)
   print_info()
+  draw([]DrawParam)
 }
 
 interface ILuminousActor {
@@ -33,6 +34,18 @@ pub mut:
 }
 
 pub type GameObject = ActorParam1 | ActorParam2
+
+pub struct Screen {
+pub mut:
+  number_of_screens int = 2
+}
+
+pub struct FloatLetter {
+pub mut:
+  letters_str string = "So many floating Letters!"
+}
+
+pub type DrawParam = Screen | FloatLetter
 
 pub struct Actor1 {
 pub mut:
@@ -104,6 +117,33 @@ pub fn (a LuminousActor) draw_luminous() {
   println("Drawing Luminous Actor")
 }
 
+pub fn (a Actor1) draw(params []DrawParam) {
+  for param in params {
+    if param is Screen {
+      println("Drawing Actor1 with Screen Param")
+      //my_screen := param as Screen
+    }
+  } 
+}
+
+pub fn (a Actor2) draw(params []DrawParam) {
+  for param in params {
+    if param is FloatLetter {
+      println("Drawing Actor2 with FloatLetter Param")
+      //my_float_letter := param as FloatLetter
+    }
+  } 
+}
+
+pub fn (a LuminousActor) draw(params []DrawParam) {
+  for param in params {
+    if param is Screen {
+      println("Drawing LuminousActor with Screen Param")
+      //my_screen := param as Screen
+    }
+  } 
+}
+
 pub  struct Game {
 pub mut:
   actor1 Actor1
@@ -133,17 +173,25 @@ pub fn (mut ap ActorPool<T>) create_actors<T>(n int, args []GameObject) {
   ap.actor_idx = 0
 }
 
-pub fn (mut ap ActorPool<T>) get_instance() ?T {
+pub fn (mut ap ActorPool<T>) get_instance() ?&T {
   for _ in 0..ap.actors.len {
     ap.actor_idx--
     if ap.actor_idx < 0 {
       ap.actor_idx = ap.actors.len - 1
     }
     if !ap.actors[ap.actor_idx].exists {
-      return ap.actors[ap.actor_idx]
+      return &ap.actors[ap.actor_idx]
     }
   }
   return none
+}
+
+pub fn (mut ap ActorPool<T>) draw(params []DrawParam) {
+  for i in 0..ap.actors.len {
+    if ap.actors[i].exists {
+      ap.actors[i].draw(params)
+    }
+  }
 }
 
 pub fn (mut ap ActorPool<T>) clear() {
@@ -188,11 +236,9 @@ pub fn main() {
   pool1.new<Actor1>(1, new_new_args1) //I'd like to use []GameObject(new_args1) instead, or better no cast at all
   pool2.new<Actor2>(1, new_new_args2)
   pool3.new<LuminousActor>(1, new_new_args3)
-  
   mut created_actor1 := pool1.get_instance() or { panic("Couldn't get an instance of Actor1, where exists = false.") }
   mut created_actor2 := pool2.get_instance() or { panic("Couldn't get an instance of Actor2, where exists = false.") }
   mut created_actor3 := pool3.get_instance() or { panic("Couldn't get an instance of LuminousActor, where exists = false.") }
-
   println("ACTOR POOL INSTANCE")
   created_actor1.print_info()
   created_actor2.print_info()
@@ -204,6 +250,12 @@ pub fn main() {
   created_actor1.print_info()
   created_actor2.print_info()
   created_actor3.print_info()
+  println("DRAW WITH CUSTOMIZED PARAMS")
+  float_letter := FloatLetter{}
+  screen := Screen{}
+  pool1.draw([DrawParam(screen)])
+  pool2.draw([DrawParam(float_letter)])
+  pool3.draw([DrawParam(screen)])
   pool1.clear()
   pool2.clear()
   pool3.clear()
