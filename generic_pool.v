@@ -218,6 +218,12 @@ pub fn (mut ap ActorPool<T>) clear() {
   ap.actor_idx = 0
 }
 
+pub fn (ap ActorPool<LuminousActor>) pool_special_luminous_function() {
+  for i in 0..ap.actors.len {
+    ap.actors[i].special_luminous_function()
+  }
+}
+
 /*
   Test implementation
 */
@@ -282,4 +288,6 @@ pub fn main() {
   game.luminous_actor_pool.print_info()
   // To finish, lets call a function which only the Luminous Actor has
   actor3_pool_item.special_luminous_function()
+  // Also works from the pool
+  game.luminous_actor_pool.pool_special_luminous_function()
 }
