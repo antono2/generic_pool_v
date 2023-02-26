@@ -156,26 +156,26 @@ pub fn (a LuminousActor) draw(params []DrawParam) {
 // as long as they are defined somewhere.
 pub  struct Game {
 pub mut:
-  actor_pool1 ActorPool<Actor1>
-  actor_pool2 ActorPool<Actor2>
-  luminous_actor_pool ActorPool<LuminousActor>
+  actor_pool1 ActorPool[Actor1]
+  actor_pool2 ActorPool[Actor2]
+  luminous_actor_pool ActorPool[LuminousActor]
 }
 
 /*
   Actor Pool manages initialization and number of Game Objects
 */
-pub struct ActorPool<T> {
+pub struct ActorPool[T] {
 mut:
   actor_idx int
 pub mut:
   actors []T
 }
 
-pub fn (mut ap ActorPool<T>) new<T>(n int, args []GameObject) {
-  ap.create_actors<T>(n, args)
+pub fn (mut ap ActorPool[T]) new[T](n int, args []GameObject) {
+  ap.create_actors[T](n, args)
 }
 
-pub fn (mut ap ActorPool<T>) create_actors<T>(n int, args []GameObject) {
+pub fn (mut ap ActorPool[T]) create_actors[T](n int, args []GameObject) {
   ap.actors = []T{len: n}
   for i in 0..ap.actors.len {
     ap.actors[i] = T{}
@@ -184,7 +184,7 @@ pub fn (mut ap ActorPool<T>) create_actors<T>(n int, args []GameObject) {
   ap.actor_idx = 0
 }
 
-pub fn (mut ap ActorPool<T>) get_instance() ?&T {
+pub fn (mut ap ActorPool[T]) get_instance() ?&T {
   for _ in 0..ap.actors.len {
     ap.actor_idx--
     if ap.actor_idx < 0 {
@@ -197,7 +197,7 @@ pub fn (mut ap ActorPool<T>) get_instance() ?&T {
   return none
 }
 
-pub fn (mut ap ActorPool<T>) draw(params []DrawParam) {
+pub fn (mut ap ActorPool[T]) draw(params []DrawParam) {
   for i in 0..ap.actors.len {
     if ap.actors[i].exists {
       ap.actors[i].draw(params)
@@ -205,20 +205,20 @@ pub fn (mut ap ActorPool<T>) draw(params []DrawParam) {
   }
 }
 
-pub fn (mut ap ActorPool<T>) print_info() {
+pub fn (mut ap ActorPool[T]) print_info() {
   for i in 0..ap.actors.len {
     ap.actors[i].print_info()
   }
 }
 
-pub fn (mut ap ActorPool<T>) clear() {
+pub fn (mut ap ActorPool[T]) clear() {
   for i in 0..ap.actors.len {
     ap.actors[i].exists = false
   }
   ap.actor_idx = 0
 }
 
-pub fn (ap ActorPool<LuminousActor>) pool_special_luminous_function() {
+pub fn (ap ActorPool[LuminousActor]) pool_special_luminous_function() {
   for i in 0..ap.actors.len {
     ap.actors[i].special_luminous_function()
   }
